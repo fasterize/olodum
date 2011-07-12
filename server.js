@@ -25,10 +25,10 @@ server.on("request", function(req, res) {
 		res.header.rd = 0;
 		res.header.nscount = 0;
 		res.header.arcount = 0;
+		res.addQuestion(req.q[i]);
 		//console.log(req.q[i]);
 		// This server only respond to A or AAAA query
-		if (req.q[i].type == ndns.ns_type.ns_t_a || req.q[i].type == ndns.ns_type.ns_t_aaaa) {
-			res.addQuestion(req.q[i]);
+		if (req.q[i].type == ndns.ns_type.ns_t_a || (req.q[i].type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) ) {
 			// domain name queried
 			var name = (req.q[0].name === '.' ? '' : req.q[0].name);
 
@@ -49,8 +49,6 @@ server.on("request", function(req, res) {
 		//send null response to queries other than A or AAAA
 		else {
 			res.header.ancount = 0;
-			res.header.arcount = 0;
-			res.addRR(req.q[0].name,10,"IN","NULL",'');
 		}
 	res.send();
 	}
