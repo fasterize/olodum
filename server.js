@@ -2,11 +2,8 @@
 separate local/dev environnement
 isolate resolver
 */
-var sys = require('sys'), puts = sys.puts;
-var dgram = require('dgram');
 var ndns = require('./lib/ndns');
-var server = ndns.createServer('udp4');
-var client = ndns.createClient('udp4');
+var dnsServer = ndns.createServer('udp4');
 
 var BIND_PORT = 53;
 var TTL = 300;
