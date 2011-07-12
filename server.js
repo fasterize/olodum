@@ -12,7 +12,7 @@ var BIND_PORT = 53;
 var TTL = 300;
 var ipv4s = [];
 ipv4s.push('31.222.176.200');
-ipv4s.push('31.222.176.201');
+//ipv4s.push('31.222.176.201');
 var ipv6s = [];
 ipv6s.push('2002:0:0:0:0:0:1fde:b0c8');
 
