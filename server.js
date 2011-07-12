@@ -50,7 +50,7 @@ dnsServer.on("request", function(req, res) {
 		// only respond to query ending with fasterized.com
 		if (name.match('fasterized\.com')) {
 			// This server only respond to A or AAAA query
-			if (req.q[i].type == ndns.ns_type.ns_t_a || (req.q[i].type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) ) {
+			if (req.q[i].type == ndns.ns_type.ns_t_a || (req.q[i].type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) || (req.q[i].type == ndns.ns_type.ns_t_ns) ) {
 
 				//add all records in ips array to response 
 				if (req.q[i].type == ndns.ns_type.ns_t_a) {
@@ -61,13 +61,19 @@ dnsServer.on("request", function(req, res) {
 					} 
 					res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');
 				}
-				else {
+				else if (req.q[i].type == ndns.ns_type.ns_t_aaaa){
 					res.header.nscount = 1;		// number of NS records
 					res.header.ancount = ipv6s.length;
 					for (var j = 0; j < ipv6s.length; j++) {
 						res.addRR(name,TTL,"IN","AAAA",ipv6s[j]);
 					} 
 					res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');
+				}
+				else if (req.q[i].type == ndns.ns_type.ns_t_ns) {
+					res.header.nscount = 1;		// number of NS records
+					res.header.ancount = 1;
+					res.addRR('ns1.fasterized.com', 10, "IN", "A", '31.222.176.247');
+					res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');					
 				}
 			}
 			//send null response to queries other than A or AAAA
