@@ -13,12 +13,12 @@ var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 
 var BIND_PORT = 53;
-var TTL = 300;
+var TTL = 5;
 
 // Temp : IP in the code, not in a global conf
 var ipv4s = [];
 if (process.env.NODE_ENV != 'dev') {
-	TTL=5;
+	TTL=300;
 	ipv4s.push('31.222.176.200');
 	//ipv4s.push('31.222.176.201');
 }
