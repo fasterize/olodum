@@ -3,7 +3,7 @@ var server = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
 
 var LOCAL_PORT = 53;
-var REMOTE_HOST = "4.2.2.1"
+var REMOTE_HOST = "208.67.222.222"
 var REMOTE_PORT = 53;
 
 server.on("request", function(req, res) {
@@ -15,4 +15,4 @@ server.on("request", function(req, res) {
 });
 
 server.bind(LOCAL_PORT);
-client.bind();
+//client.bind();
