@@ -2,33 +2,56 @@ var vows = require('vows'),
     assert = require('assert');
 		dns = require('dns');
 
-
-//je teste qu'un domaine fasterized.com donne bien 31.222.176.200
-vows.describe('A fasterized.com request returns 31.222.176.200').addBatch({
-		'test fasterized.com': {
-        topic: function () { 
-       		dns.resolve4("fasterized.com", this.callback);
-       	},
-        'no error returned': function (err, addresses) {
+//je teste qu'un domaine client fasterize donne bien 31.222.176.200
+vows.describe('DNS testing').addBatch({
+		'In a PROD Env,' : {
+			'a "www.monclient.org" request should return ': {
+		        topic: function () { 
+		       		dns.resolve4("www.monclient.org", this.callback);
+		       	},
+		        'with no error': function (err, addresses) {
 					assert.isArray(addresses);
 					assert.isNull(err);
-        },
-        'check returned IP': function (err, addresses) {
-	        assert.notEqual(addresses, undefined);
+		        },
+		        'and with returned IP = 31.222.176.200': function (err, addresses) {
 					assert.equal(addresses, "31.222.176.200");
-        }
-    }
-}).addBatch({
-		'test DNS relay':{
-			topic: function(){
-				dns.resolve4("notfasterized.com", this.callback);
+		        }
 			},
-			'no error returned': function (err, addresses) {
-				assert.isArray(addresses);
-				assert.isNull(err);
+			'a "www-org.monclient.org" request should return ' : {
+				topic: function() {
+					dns.resolve4("www-org.monclient.org", this.callback);
+				},
+		        'with no error': function (err, addresses) {
+					assert.isArray(addresses);
+					assert.isNull(err);
+		        },
+		        'and with returned IP = 88.190.23.8': function (err, addresses) {
+					assert.equal(addresses, '88.190.23.8');
+		        }
 			},
-			'check returned message is origin':function(err, addresses){
-				assert.isEmpty(addresses);
+			'a "www.monclient.org" AAAA request should return':{
+				topic: function(){
+					dns.resolve("www.monclient.org", "AAAA",this.callback);
+				},
+				'an error': function (err, addresses) {
+					assert.isNotNull(err);
+				},
+				'and no record defined':function(err, addresses){
+			        assert.isUndefined(addresses);
+					//assert.isEmpty(addresses);
+				}
+			},
+			'a "toto.fasterized.com" NS request should return ns1.fasterized.com': {
+				topic: function(){
+					dns.resolve("toto.fasterized.com", "NS",this.callback);
+				},
+				'with no error' : function (err, addresses) {
+					assert.isNull(err);
+				},
+				'and a record defined as ns1.fasterized.com' : function(err, addresses){
+			        assert.equal(addresses,'ns1.fasterized.com');
+					//assert.isEmpty(addresses);
+				}
 			}
 		}
 }).export(module);
