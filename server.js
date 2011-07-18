@@ -1,7 +1,12 @@
 /* TODO : 
-refactor ipv4/ipv6
-separate local/dev environnement
-isolate resolver
+ - DEV ENV : add this server as a default DNS system server when starting and remove when quit or interrupt
+ - tests
+ - refactor ipv4/ipv6/ns
+ - separate local/dev environnement
+ - isolate resolver
+ - use a configuration file
+ - log with a syslog-like utility (ain ?)
+
 process.env.NODE_DEV only accessible in sudo if added to the user env variable then exported :
 $ NODE_ENV=dev
 $ export NODE_ENV
@@ -9,15 +14,25 @@ $ sudo visudo
 => add this line
 Defaults        env_keep += "NODE_ENV"
 */
+// requires
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
+var client = ndns.createClient('udp4');
 
+var TTL = 5; // default TTL in DEV ENV
+var REMOTE_HOST = "208.67.222.222" //openDNS
+var REMOTE_PORT = 53;
 var BIND_PORT = 53;
-var TTL = 5;
+var isDev = (process.env.NODE_ENV == 'dev')
+
+//if ENV DEV, register as a local DNS
+//if linux, add a line to /etc/resolv.conf
+//if mac, gloups
+//if windows, double gloups
 
 // Temp : IP in the code, not in a global conf
 var ipv4s = [];
-if (process.env.NODE_ENV != 'dev') {
+if (!isDev) {
 	TTL=300;
 	ipv4s.push('31.222.176.200');
 	//ipv4s.push('31.222.176.201');
@@ -32,7 +47,7 @@ dnsServer.on("request", function(req, res) {
 	// duplicate query headers in response
     res.setHeader(req.header);
 
-	//
+	//process all subqueries
     for (var i = 0; i < req.q.length; i++) {
 		//parse query and add it to the response object
 		res.addQuestion(req.q[i]);
@@ -47,13 +62,14 @@ dnsServer.on("request", function(req, res) {
 		// domain name queried
 		var name = (req.q[0].name === '.' ? '' : req.q[0].name);
 
-		// only respond to query ending with fasterized.com
-		if (name.match('fasterized\.com')) {
+		// only respond to query ending with fasterized.com, otherwise proxy request
+		if (!isDev) {
+			var type = req.q[i].type
 			// This server only respond to A or AAAA query
-			if (req.q[i].type == ndns.ns_type.ns_t_a || (req.q[i].type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) || (req.q[i].type == ndns.ns_type.ns_t_ns) ) {
+			if (type == ndns.ns_type.ns_t_a || (type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) || (type == ndns.ns_type.ns_t_ns) ) {
 
 				//add all records in ips array to response 
-				if (req.q[i].type == ndns.ns_type.ns_t_a) {
+				if (type == ndns.ns_type.ns_t_a) {
 					res.header.nscount = 1;		// number of NS records
 					res.header.ancount = ipv4s.length;
 					for (var j = 0; j < ipv4s.length; j++) {
@@ -61,7 +77,7 @@ dnsServer.on("request", function(req, res) {
 					} 
 					res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');
 				}
-				else if (req.q[i].type == ndns.ns_type.ns_t_aaaa){
+				else if (type == ndns.ns_type.ns_t_aaaa){
 					res.header.nscount = 1;		// number of NS records
 					res.header.ancount = ipv6s.length;
 					for (var j = 0; j < ipv6s.length; j++) {
@@ -69,19 +85,38 @@ dnsServer.on("request", function(req, res) {
 					} 
 					res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');
 				}
-				else if (req.q[i].type == ndns.ns_type.ns_t_ns) {
+				else if (type == ndns.ns_type.ns_t_ns) {
 					res.header.nscount = 1;		// number of NS records
 					res.header.ancount = 1;
 					res.addRR('ns1.fasterized.com', 10, "IN", "A", '31.222.176.247');
 					res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');					
 				}
 			}
-			//send null response to queries other than A or AAAA
+			//send 0 response to queries other than A / AAAA / NS
 			else {
 				res.header.ancount = 0;
 			}
+			res.send();
 		}
-	res.send();
+		//DEV ENV : proxy request DNS except "fasterized.com" domains
+		else {
+			var c_req = client.request(REMOTE_PORT, REMOTE_HOST);
+			//set Recursive Desire bit (to resolve CNAME for example)
+			req.setHeader({
+			rd: 1
+			});
+		    c_req.on("response", function (c_res) {
+				//hook DNS response with local IP if "fasterized.com" domain
+				for (var j = 0 ; j < c_res.rr.length ; j++) {
+					if (c_res.rr[j].name.indexOf('fasterized.com') != -1) {
+						c_res.rr[j].rdata.a = '127.0.0.1'
+						c_res.rr[j].rdata[0] = '127.0.0.1'
+					}
+				}
+				res.send(c_res);
+		    });
+		    c_req.send(req);
+		}
 	}
 });
 
@@ -89,4 +124,14 @@ process.on('uncaughtException', function (err) {
   console.log('Caught exception: ' + err);
 });
 
+//if DEV ENV, unregister local DNS server on exit
+if (isDev) {
+	process.stdin.resume();
+	process.on('SIGINT', function () {
+	  console.log('Got SIGINT.  Press Control-D to exit.');
+		process.exit(0);
+	});
+}
+
+console.log('Starting in environment : ' + process.env.NODE_ENV + ' on port ' + BIND_PORT);
 dnsServer.bind(BIND_PORT);
