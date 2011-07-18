@@ -14,21 +14,56 @@ $ sudo visudo
 => add this line
 Defaults        env_keep += "NODE_ENV"
 */
+
+// nodejs requires
+var os = require('os'),
+		exec = require('child_process').exec;
+	
 // requires
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
 
+
 var TTL = 5; // default TTL in DEV ENV
 var REMOTE_HOST = "208.67.222.222" //openDNS
 var REMOTE_PORT = 53;
 var BIND_PORT = 53;
-var isDev = (process.env.NODE_ENV == 'dev')
+var isDev = (process.env.NODE_ENV == 'dev');
+
+var osType = os.type();
 
 //if ENV DEV, register as a local DNS
-//if linux, add a line to /etc/resolv.conf
-//if mac, gloups
-//if windows, double gloups
+if(isDev){
+	if(osType === "Linux") {// Linux
+		// Create a backup 
+		fs.writeFileSync("/etc/resolv.conf.orig",fs.readFileSync("/etc/resolv.conf"), function (err) {
+		  if (err) throw err;
+		});
+		// Edit resolv.conf
+		fs.readFile('/etc/resolv.conf.orig', function (err, data) {
+		  if (err) throw err;
+		  toWrite = data+"\nnameserver 127.0.0.1";
+		  fs.writeFile('/etc/resolv.conf', data, function(err){
+		    if (err) throw err;
+		    console.log('resolv.conf file has been updated!');
+		  });
+		});
+	} 
+	if( osType === "Darwin"){ //Macs
+		// Change DNS IP with networksetup
+		child = exec('networksetup -setdnsservers "AirPort" 127.0.0.1',
+		  function (error) {
+		    if (error !== null) {
+		      console.log('exec error: ' + error);
+		    }
+		    console.log('networksetup rules has been added');
+		});	
+	
+	}
+	//if windows, double gloups
+}
+
 
 // Temp : IP in the code, not in a global conf
 var ipv4s = [];
@@ -127,11 +162,34 @@ process.on('uncaughtException', function (err) {
 //if DEV ENV, unregister local DNS server on exit
 if (isDev) {
 	process.stdin.resume();
-	process.on('SIGINT', function () {
-	  console.log('Got SIGINT.  Press Control-D to exit.');
-		process.exit(0);
+	
+	process.on('SIGINT', function() {
+	  console.log('Detected closing signal.  Press Control-D to exit.');
+	  if(osType === "Linux"){
+			// Restore resolv.conf
+			fs.writeFileSync("/etc/resolv.conf",fs.readFileSync("/etc/resolv.conf.orig"), function (err) {
+			  if (err) throw err;
+			});
+			fs.unlink("/etc/resolv.conf/.orig");
+			
+	  }
+	  if(osType === "Darwin"){
+	  	child = exec('networksetup -setdnsservers "AirPort" "Empty"',
+	  	  function (error) {
+	  	    if (error !== null) {
+	  	      console.log('exec error: ' + error);
+	  	    }
+	  	    console.log('networksetup rules has been removed');
+	  	});	
+	  }
+	  
+	  // Wait for the async task to ends then kill process
+	  setTimeout(function () {
+	    console.log('Stopping nDNS...');
+	    process.exit(0);
+	  }, 500);
 	});
 }
 
-console.log('Starting in environment : ' + process.env.NODE_ENV + ' on port ' + BIND_PORT);
+console.log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV + ' on port ' + BIND_PORT);
 dnsServer.bind(BIND_PORT);
