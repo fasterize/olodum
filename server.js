@@ -88,8 +88,8 @@ dnsServer.on("request", function(req, res) {
 				else if (type == ndns.ns_type.ns_t_ns) {
 					res.header.nscount = 1;		// number of NS records
 					res.header.ancount = 1;
-					res.addRR('ns1.fasterized.com', 10, "IN", "A", '31.222.176.247');
 					res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');					
+					res.addRR('ns1.fasterized.com', 10, "IN", "A", '31.222.176.247');
 				}
 			}
 			//send 0 response to queries other than A / AAAA / NS
