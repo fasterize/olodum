@@ -170,7 +170,7 @@ if (isDev) {
 			fs.writeFileSync("/etc/resolv.conf",fs.readFileSync("/etc/resolv.conf.orig"), function (err) {
 			  if (err) throw err;
 			});
-			fs.unlink("/etc/resolv.conf/.orig");
+			fs.unlink("/etc/resolv.conf.orig");
 			
 	  }
 	  if(osType === "Darwin"){
