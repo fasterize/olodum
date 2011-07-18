@@ -1,9 +1,14 @@
+/*
+TODO
+ - separate DEV/PROD tests
+ - integrate with server.js (require + process.env.NODE_ENV ?)
+*/
+
 var vows = require('vows'),
     assert = require('assert');
 		dns = require('dns');
 
-//je teste qu'un domaine client fasterize donne bien 31.222.176.200
-vows.describe('DNS testing').addBatch({
+vows.describe('DNS testing in a PROD env').addBatch({
 		'In a PROD Env,' : {
 			'a "www.monclient.org" request should return ': {
 		        topic: function () { 
@@ -38,7 +43,6 @@ vows.describe('DNS testing').addBatch({
 				},
 				'and no record defined':function(err, addresses){
 			        assert.isUndefined(addresses);
-					//assert.isEmpty(addresses);
 				}
 			},
 			'a "toto.fasterized.com" NS request should return ns1.fasterized.com': {
@@ -50,20 +54,22 @@ vows.describe('DNS testing').addBatch({
 				},
 				'and a record defined as ns1.fasterized.com' : function(err, addresses){
 			        assert.equal(addresses,'ns1.fasterized.com');
-					//assert.isEmpty(addresses);
+				}
+			},
+			'a "tata.fasterized.com" A request should return ': {
+				topic: function(){
+					dns.resolve4("tata.fasterized.com", this.callback);
+				},
+				'with no error' : function (err, addresses) {
+					assert.isNull(err);
+				},
+				'and a record defined as 31.222.176.200' : function(err, addresses){
+			        assert.equal(addresses,'31.222.176.200');
 				}
 			}
 		}
 }).export(module);
 
-
-//je teste qu'un domaine notfasterized.com donne bien l'origine
-
-//je teste qu'une query de type A renvoie un enreg
-
-//je checke qu'une query de type AAAA renvoie un enreg 
-
-//je checke qu'une query de type NS renvoie un enreg
 
 //je checke qu'une query en local donne mon serveur local
 
