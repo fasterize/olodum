@@ -1,0 +1,29 @@
+nbproject/
+nbactions.xml
+# Windows image file caches
+Thumbs.db
+
+# Folder config file
+Desktop.ini
+.*.sw[a-z]
+*.un~
+Session.vim
+*.tmproj
+*.tmproject
+tmtags
+.*
+!.gitignore
+*~
+
+# KDE
+.directory
+
+.DS_Store
+Icon?
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
