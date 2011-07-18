@@ -65,7 +65,7 @@ dnsServer.on("request", function(req, res) {
 		// only respond to query ending with fasterized.com, otherwise proxy request
 		if (!isDev) {
 			var type = req.q[i].type
-			// This server only respond to A or AAAA query
+			// This server only respond to A or AAAA or NS query
 			if (type == ndns.ns_type.ns_t_a || (type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) || (type == ndns.ns_type.ns_t_ns) ) {
 
 				//add all records in ips array to response 
@@ -108,7 +108,7 @@ dnsServer.on("request", function(req, res) {
 		    c_req.on("response", function (c_res) {
 				//hook DNS response with local IP if "fasterized.com" domain
 				for (var j = 0 ; j < c_res.rr.length ; j++) {
-					if (c_res.rr[j].name.indexOf('fasterized.com') != -1) {
+					if (c_res.rr[j].name.indexOf('.fasterized.com') != -1) {
 						c_res.rr[j].rdata.a = '127.0.0.1'
 						c_res.rr[j].rdata[0] = '127.0.0.1'
 					}
