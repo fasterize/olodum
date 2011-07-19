@@ -1,12 +1,11 @@
 /*
 TODO
- - separate DEV/PROD tests
- - integrate with server.js (require + process.env.NODE_ENV ?)
+ - integrate with server.js (require + process.env.NODE_ENV ?) : launch server.js before and check everything is ok
 */
 
-var vows = require('vows'),
-    assert = require('assert');
-		dns = require('dns');
+var vows = require('vows');
+var assert = require('assert');
+var	dns = require('dns');
 
 vows.describe('DNS testing in a PROD env').addBatch({
 		'In a PROD Env,' : {
@@ -69,8 +68,3 @@ vows.describe('DNS testing in a PROD env').addBatch({
 			}
 		}
 }).export(module);
-
-
-//je checke qu'une query en local donne mon serveur local
-
-//je foire, je continue de renvoyer un record
