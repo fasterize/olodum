@@ -3,7 +3,7 @@
  - tests
  - refactor ipv4/ipv6/ns
  - separate local/dev environnement
- - isolate resolver
+ - develop and isolate a resolver
  - use a configuration file
  - log with a syslog-like utility (ain ?)
 
@@ -15,55 +15,43 @@ $ sudo visudo
 Defaults        env_keep += "NODE_ENV"
 */
 
-// nodejs requires
-var os = require('os'),
-		exec = require('child_process').exec;
-	
 // requires
+var os = require('os');
+var exec = require('child_process').exec;
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
 
-
+// Const
 var TTL = 5; // default TTL in DEV ENV
 var REMOTE_HOST = "208.67.222.222" //openDNS
 var REMOTE_PORT = 53;
 var BIND_PORT = 53;
-var isDev = (process.env.NODE_ENV == 'dev');
-
+var isDev = (process.env.NODE_ENV === 'dev');
 var osType = os.type();
 
-//if ENV DEV, register as a local DNS
-if(isDev){
-	if(osType === "Linux") {// Linux
-		// Create a backup 
-		fs.writeFileSync("/etc/resolv.conf.orig",fs.readFileSync("/etc/resolv.conf"), function (err) {
-		  if (err) throw err;
-		});
-		// Edit resolv.conf
-		fs.readFile('/etc/resolv.conf.orig', function (err, data) {
-		  if (err) throw err;
-		  toWrite = data+"\nnameserver 127.0.0.1";
-		  fs.writeFile('/etc/resolv.conf', data, function(err){
-		    if (err) throw err;
-		    console.log('resolv.conf file has been updated!');
-		  });
-		});
-	} 
-	if( osType === "Darwin"){ //Macs
-		// Change DNS IP with networksetup
-		child = exec('networksetup -setdnsservers "AirPort" 127.0.0.1',
-		  function (error) {
-		    if (error !== null) {
-		      console.log('exec error: ' + error);
-		    }
-		    console.log('networksetup rules has been added');
-		});	
-	
-	}
-	//if windows, double gloups
+//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
+if (isDev) {
+	// Change DNS Server IP with networksetup
+	child = exec('networksetup -setdnsservers "AirPort" 127.0.0.1', function (error) {
+		if (error !== null) {
+			console.log('exec error: ' + error);
+		}
+		console.log('networksetup rules has been added');
+	});
 }
 
+function exitServer () {
+	console.log('Detected closing signal.  Press Control-D to exit.');
+  	child = exec('networksetup -setdnsservers "AirPort" "Empty"', function (error) {
+		if (error !== null) {
+			console.log('exec error: ' + error);
+  	    }
+  	    console.log('networksetup rules has been removed');
+	    console.log('Stopping nDNS...');
+	    process.exit(0);
+  	});
+};
 
 // Temp : IP in the code, not in a global conf
 var ipv4s = [];
@@ -78,7 +66,7 @@ else {
 var ipv6s = [];
 //ipv6s.push('2002:0:0:0:0:0:1fde:b0c8');
 
-dnsServer.on("request", function(req, res) {
+dnsServer.on("request", function (req, res) {
 	// duplicate query headers in response
     res.setHeader(req.header);
 
@@ -155,39 +143,15 @@ dnsServer.on("request", function(req, res) {
 	}
 });
 
-process.on('uncaughtException', function (err) {
-  console.log('Caught exception: ' + err);
-});
-
-//if DEV ENV, unregister local DNS server on exit
+//if DEV ENV, unregister local DNS server on exit else just trap exception
 if (isDev) {
 	process.stdin.resume();
-	
-	process.on('SIGINT', function() {
-	  console.log('Detected closing signal.  Press Control-D to exit.');
-	  if(osType === "Linux"){
-			// Restore resolv.conf
-			fs.writeFileSync("/etc/resolv.conf",fs.readFileSync("/etc/resolv.conf.orig"), function (err) {
-			  if (err) throw err;
-			});
-			fs.unlink("/etc/resolv.conf.orig");
-			
-	  }
-	  if(osType === "Darwin"){
-	  	child = exec('networksetup -setdnsservers "AirPort" "Empty"',
-	  	  function (error) {
-	  	    if (error !== null) {
-	  	      console.log('exec error: ' + error);
-	  	    }
-	  	    console.log('networksetup rules has been removed');
-	  	});	
-	  }
-	  
-	  // Wait for the async task to ends then kill process
-	  setTimeout(function () {
-	    console.log('Stopping nDNS...');
-	    process.exit(0);
-	  }, 500);
+	process.on('SIGINT', exitServer);
+	process.on('SIGTERM', exitServer);
+}
+else {
+	process.on('uncaughtException', function (err) {
+		console.log('Caught exception: ' + err);
 	});
 }
 
