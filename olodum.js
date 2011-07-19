@@ -1,11 +1,8 @@
 /* TODO : 
- - DEV ENV : add this server as a default DNS system server when starting and remove when quit or interrupt
- - tests
- - refactor ipv4/ipv6/ns
- - separate local/dev environnement
+ - refactor ipv4/ipv6/ns ? (=> use an object ?)
  - develop and isolate a resolver
- - use a configuration file
- - log with a syslog-like utility (ain ?)
+ - use a configuration file (wait for vvo's one)
+ - log with a syslog-like utility in PROD env (ain ?)
 
 process.env.NODE_DEV only accessible in sudo if added to the user env variable then exported :
 $ NODE_ENV=dev
@@ -23,7 +20,7 @@ var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
 
 // Const
-var TTL = 5; // default TTL in DEV ENV
+var TTL = 5; // default TTL in DEV env
 var REMOTE_HOST = "208.67.222.222" //openDNS
 var REMOTE_PORT = 53;
 var BIND_PORT = 53;
@@ -33,37 +30,38 @@ var osType = os.type();
 // growl notification for DEV ENV
 //growl = require('growl');
 
+function log(msg) {
+	if (isDev) {
+		//growl.notify(msg, { title: 'Fasterize Local DNS Server'})
+		console.log(Date() + msg)
+	}
+	else {
+		//syslog(msg)
+		console.log(Date() + msg)
+	}
+};
+
 function exitServer () {
-	console.log('Detected closing signal.  Press Control-D to exit.');
-  	child = exec('networksetup -setdnsservers "AirPort" "Empty"', function (error) {
+	log('Detected closing signal.');
+  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
 		if (error !== null) {
-			console.log('exec error: ' + error);
+			log('exec error: ' + error);
   	    }
-  	    console.log('networksetup rules has been removed');
-	    console.log('Stopping nDNS...');
+  	    log('Networksetup rules has been removed');
+	    log('Stopping Olodum Server');
 	    process.exit(0);
   	});
 };
 
-function log(msg) {
-	if (isDev) {
-		//growl.notify(msg, { title: 'Fasterize Local DNS Server'})
-		console.log(Date.time + msg)
-	}
-	else {
-		//syslog(msg)
-		console.log(Date.time + msg)
-	}
-}
 
 //if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
 if (isDev) {
 	// Change DNS Server IP with networksetup
 	child = exec('networksetup -setdnsservers "AirPort" 127.0.0.1', function (error) {
 		if (error !== null) {
-			console.log('exec error: ' + error);
+			log('exec error: ' + error);
 		}
-		console.log('networksetup rules has been added');
+		log('Networksetup rules has been added');
 	});
 }
 
@@ -79,6 +77,11 @@ else {
 }
 var ipv6s = [];
 //ipv6s.push('2002:0:0:0:0:0:1fde:b0c8');
+var nss = [];
+nss.push('ns1.fasterized.com');
+var ips;
+var first;
+
 
 var olodum = function (){
 	var mainListener = function (req, res) {
@@ -105,28 +108,29 @@ var olodum = function (){
 				var type = req.q[i].type
 				// This server only respond to A or AAAA or NS query
 				if (type == ndns.ns_type.ns_t_a || (type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) || (type == ndns.ns_type.ns_t_ns) ) {
-
+					res.header.nscount = 1;		// number of NS records
 					//add all records in ips array to response 
 					if (type == ndns.ns_type.ns_t_a) {
-						res.header.nscount = 1;		// number of NS records
-						res.header.ancount = ipv4s.length;
-						for (var j = 0; j < ipv4s.length; j++) {
-							res.addRR(name,TTL,"IN","A",ipv4s[j]);
-						} 
-						res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');
+						ips = ipv4s;
+						first = "A";
 					}
-					else if (type == ndns.ns_type.ns_t_aaaa){
-						res.header.nscount = 1;		// number of NS records
-						res.header.ancount = ipv6s.length;
-						for (var j = 0; j < ipv6s.length; j++) {
-							res.addRR(name,TTL,"IN","AAAA",ipv6s[j]);
-						} 
-						res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');
+					else if (type == ndns.ns_type.ns_t_aaaa) {
+						ips = ipv6s;
+						first = "A";
 					}
 					else if (type == ndns.ns_type.ns_t_ns) {
-						res.header.nscount = 1;		// number of NS records
-						res.header.ancount = 1;
+						ips = nss;
+					}
+					//set unmber of Resource Record
+					res.header.ancount = ips.length;
+					for (var j = 0; j < ips.length; j++) {
+						res.addRR(name,TTL,"IN",p_type_syms[type],ips[j]);
+					} 
+					//add an NS record for Authority Response or A record for NS query
+					if (first === 'A') {
 						res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');					
+					}
+					else {
 						res.addRR('ns1.fasterized.com', 10, "IN", "A", '31.222.176.247');
 					}
 				}
@@ -136,7 +140,7 @@ var olodum = function (){
 				}
 				res.send();
 			}
-			//DEV ENV : proxy request DNS except "fasterized.com" domains
+			//DEV env : proxy request DNS except "fasterized.com" domains
 			else {
 				var c_req = client.request(REMOTE_PORT, REMOTE_HOST);
 				//set Recursive Desire bit (to resolve CNAME for example)
@@ -157,20 +161,20 @@ var olodum = function (){
 	}
 
 	dnsServer.on("request", mainListener);
-	console.log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV + ' on port ' + BIND_PORT);
+	log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV + ' on port ' + BIND_PORT);
 	return function () {
 		dnsServer.bind(BIND_PORT);
-	}
-	//if DEV ENV, unregister local DNS server on exit else just trap exception
-	if (isDev) {
-		process.stdin.resume();
-		process.on('SIGINT', exitServer);
-		process.on('SIGTERM', exitServer);
-	}
-	else {
-		process.on('uncaughtException', function (err) {
-			console.log('Caught exception: ' + err);
-		});
+		//if DEV env, unregister local DNS server on exit else just trap exception
+		if (isDev) {
+			process.stdin.resume();
+			process.on('SIGINT', exitServer);
+			process.on('SIGTERM', exitServer);
+		}
+		else {
+			process.on('uncaughtException', function (err) {
+				log('Caught exception: ' + err);
+			});
+		}
 	}
 }();
 
