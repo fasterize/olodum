@@ -5,11 +5,17 @@ TODO
  - tests register/unregister local dns server
 */
 
-var vows = require('vows'),
-    assert = require('assert');
-		dns = require('dns');
-
-vows.describe('DNS testing in a PROD env').addBatch({
+var vows = require('vows');
+var assert = require('assert');
+var	dns = require('dns');
+/*
+vows.describe('DNS testing in a DEV env').addBatch({
+	'Starting local DNS Server' : {
+		topic: dnsServer.start(),
+		'should return no error' :
+	}
+})*/
+vows.describe('DNS testing in a DEV env').addBatch({
 		'In a DEV Env,' : {
 			'a "www.monclient.org" request should return ': {
 		        topic: function () { 
@@ -19,8 +25,8 @@ vows.describe('DNS testing in a PROD env').addBatch({
 					assert.isArray(addresses);
 					assert.isNull(err);
 		        },
-		        'and with returned IP = 31.222.176.200': function (err, addresses) {
-					assert.equal(addresses, "31.222.176.200");
+		        'and with returned IP = 127.0.0.1': function (err, addresses) {
+					assert.equal(addresses, "127.0.0.1");
 		        }
 			},
 			'a "www-org.monclient.org" request should return ' : {
@@ -64,14 +70,9 @@ vows.describe('DNS testing in a PROD env').addBatch({
 				'with no error' : function (err, addresses) {
 					assert.isNull(err);
 				},
-				'and a record defined as 31.222.176.200' : function(err, addresses){
-			        assert.equal(addresses,'31.222.176.200');
+				'and a record defined as 127.0.0.1' : function(err, addresses){
+			        assert.equal(addresses,'127.0.0.1');
 				}
 			}
 		}
 }).export(module);
-
-
-//je checke qu'une query en local donne mon serveur local
-
-//je foire, je continue de renvoyer un record
