@@ -33,11 +33,11 @@ var osType = os.type();
 function log(msg) {
 	if (isDev) {
 		//growl.notify(msg, { title: 'Fasterize Local DNS Server'})
-		console.log(Date() + msg)
+		console.log(Date()+ '\t' + msg)
 	}
 	else {
 		//syslog(msg)
-		console.log(Date() + msg)
+		console.log(Date() + '\t' + msg)
 	}
 };
 
