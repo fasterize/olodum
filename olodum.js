@@ -13,7 +13,6 @@ Defaults        env_keep += "NODE_ENV"
 */
 
 // requires
-var os = require('os');
 var exec = require('child_process').exec;
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
@@ -24,64 +23,26 @@ var TTL = 5; // default TTL in DEV env
 var REMOTE_HOST = "208.67.222.222" //openDNS
 var REMOTE_PORT = 53;
 var BIND_PORT = 53;
-var isDev = (process.env.NODE_ENV === 'dev');
-var osType = os.type();
 
-// growl notification for DEV ENV
+// growl notification for DEV env
 //growl = require('growl');
 
 function log(msg) {
 	if (isDev) {
 		//growl.notify(msg, { title: 'Fasterize Local DNS Server'})
-		console.log(Date()+ '\t' + msg)
+		if (typeof msg ==='string') {
+			console.log(Date()+ '\t' + msg);
+		}
+		else {
+			console.log(Date());
+			console.log(msg)
+		}
 	}
 	else {
 		//syslog(msg)
 		console.log(Date() + '\t' + msg)
 	}
 };
-
-function exitServer () {
-	log('Detected closing signal.');
-  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
-		if (error !== null) {
-			log('exec error: ' + error);
-  	    }
-  	    log('Networksetup rules has been removed');
-	    log('Stopping Olodum Server');
-	    process.exit(0);
-  	});
-};
-
-
-//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
-if (isDev) {
-	// Change DNS Server IP with networksetup
-	child = exec('networksetup -setdnsservers "AirPort" 127.0.0.1', function (error) {
-		if (error !== null) {
-			log('exec error: ' + error);
-		}
-		log('Networksetup rules has been added');
-	});
-}
-
-// Temp : IP in the code, not in a global conf
-var ipv4s = [];
-if (!isDev) {
-	TTL=300;
-	ipv4s.push('31.222.176.200');
-	//ipv4s.push('31.222.176.201');
-}
-else {
-	ipv4s.push('127.0.0.1');
-}
-var ipv6s = [];
-//ipv6s.push('2002:0:0:0:0:0:1fde:b0c8');
-var nss = [];
-nss.push('ns1.fasterized.com');
-var ips;
-var first;
-
 
 var olodum = function (){
 	var mainListener = function (req, res) {
@@ -160,20 +121,76 @@ var olodum = function (){
 		}
 	}
 
-	dnsServer.on("request", mainListener);
-	log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV + ' on port ' + BIND_PORT);
-	return function () {
-		dnsServer.bind(BIND_PORT);
-		//if DEV env, unregister local DNS server on exit else just trap exception
-		if (isDev) {
-			process.stdin.resume();
-			process.on('SIGINT', exitServer);
-			process.on('SIGTERM', exitServer);
-		}
-		else {
-			process.on('uncaughtException', function (err) {
-				log('Caught exception: ' + err);
+	return {
+		init : function() {
+			isDev = (process.env.NODE_ENV === 'dev');
+
+			// Temp : IP in the code, not in a global conf
+			var ipv4s = [];
+			if (!isDev) {
+				TTL=300;
+				ipv4s.push('31.222.176.200');
+				//ipv4s.push('31.222.176.201');
+			}
+			else {
+				ipv4s.push('127.0.0.1');
+			}
+			var ipv6s = [];
+			//ipv6s.push('2002:0:0:0:0:0:1fde:b0c8');
+			var nss = [];
+			nss.push('ns1.fasterized.com');
+			var ips;
+			var first;
+			return this;
+		},
+		start : function (callback) {
+			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV);
+			dnsServer.on("request", mainListener);
+			dnsServer.on("listening", function () {
+				 log('Olodum listening on port ' + BIND_PORT);
 			});
+			dnsServer.bind(BIND_PORT);
+			this.started = true;
+			//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
+			if (isDev) {
+				// Change DNS Server IP with networksetup
+				exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
+					if (error !== null) {
+						log('exec error: ' + error);
+					}
+					log('Networksetup rules has been added');
+					//wait for calling callback if needed (in mac )
+					if (typeof callback === 'function') setTimeout(callback,500);
+				});
+			}
+
+			//if DEV env, unregister local DNS server on exit else just trap exception
+			if (isDev) {
+				process.stdin.resume();
+				process.on('SIGINT', this.stop);
+				process.on('SIGTERM', this.stop);
+			}
+			else {
+				process.on('uncaughtException', function (err) {
+					log('Caught exception: ' + err);
+				});
+			}
+		},
+		stop : function () {
+			log('Stopping Olodum Server ...');
+			if (isDev) {
+			  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
+					if (error !== null) {
+						log('exec error: ' + error);
+			  	    }
+			  	    log('Networksetup rules has been removed. Now exit');
+					process.exit(0);
+				});
+			}
+			else {
+				log('Now exit');
+				process.exit(0);
+			}
 		}
 	}
 }();
