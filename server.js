@@ -30,16 +30,8 @@ var BIND_PORT = 53;
 var isDev = (process.env.NODE_ENV === 'dev');
 var osType = os.type();
 
-//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
-if (isDev) {
-	// Change DNS Server IP with networksetup
-	child = exec('networksetup -setdnsservers "AirPort" 127.0.0.1', function (error) {
-		if (error !== null) {
-			console.log('exec error: ' + error);
-		}
-		console.log('networksetup rules has been added');
-	});
-}
+// growl notification for DEV ENV
+//growl = require('growl');
 
 function exitServer () {
 	console.log('Detected closing signal.  Press Control-D to exit.');
@@ -52,6 +44,28 @@ function exitServer () {
 	    process.exit(0);
   	});
 };
+
+function log(msg) {
+	if (isDev) {
+		//growl.notify(msg, { title: 'Fasterize Local DNS Server'})
+		console.log(Date.time + msg)
+	}
+	else {
+		//syslog(msg)
+		console.log(Date.time + msg)
+	}
+}
+
+//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
+if (isDev) {
+	// Change DNS Server IP with networksetup
+	child = exec('networksetup -setdnsservers "AirPort" 127.0.0.1', function (error) {
+		if (error !== null) {
+			console.log('exec error: ' + error);
+		}
+		console.log('networksetup rules has been added');
+	});
+}
 
 // Temp : IP in the code, not in a global conf
 var ipv4s = [];
