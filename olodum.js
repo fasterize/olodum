@@ -186,8 +186,9 @@ var olodum = function (){
 						});
 					});
 				}
-				//wait for calling callback if needed (in mac)
-				if (typeof callback === 'function') setTimeout(callback,500);
+				// wait for calling callback if needed
+				// below 1000ms tests started before the whole initialization was done
+				if (typeof callback === 'function') setTimeout(callback,1000);
 			}
 
 			//if DEV env, unregister local DNS server on exit else just trap exception

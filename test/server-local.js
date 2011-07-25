@@ -16,6 +16,7 @@ suite.addBatch({
 		topic: function() {
 			process.env.NODE_ENV = 'dev';
 			olodum.init().start(this.callback);
+			setTimeout(5000, this.works);
 		},
 		'works': function() {
 			assert.isTrue(olodum.started);
