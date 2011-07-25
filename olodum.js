@@ -166,24 +166,12 @@ var olodum = function (){
 					});
 				}
 				else{
-					newFile = fs.createWriteStream('/etc/resolv.conf.orig');     
-					oldFile = fs.createReadStream('/etc/resolv.conf');
+					exec('cp /etc/resolv.conf /etc/resolv.conf.orig && echo "\nnameserver 127.0.0.1 >> /etc/resolv.conf"', function (error) {
+						if (error !== null) {
+							log('exec error: ' + error);
+						}
+						log('Local nameserver has been added in resolv.conf');
 					
-					newFile.once('open', function(fd){
-						require('util').pump(oldFile, newFile, function(){
-							fs.open('/etc/resolv.conf', "a", 0644, function(err, fd) {
-								if (err){
-									log('exec error: ' + err);
-								}
-								fs.write(fd, "\nnameserver 127.0.0.1\n", undefined, undefined, function(err, written) {
-									if (err){
-										log('exec error: ' + error);
-									}
-									fs.closeSync(fd);
-									log('resolv.conf file has bees updated');
-								});
-							});
-						});
 					});
 				}
 				// wait for calling callback if needed
@@ -207,27 +195,25 @@ var olodum = function (){
 			log('Stopping Olodum Server ...');
 			if (isDev) {
 				if(osType == "Darwin"){
-				  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
+					exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
 						if (error !== null) {
 							log('exec error: ' + error);
-				  	    }
-				  	    log('Networksetup rules has been removed. Now exit');
-						process.exit(0);
+						}
+						log('Networksetup rules has been removed. Now exit');
 					});
 				} else {
-					fs.unlink("/etc/resolv.conf", function(){
-						fs.link("/etc/resolv.conf.orig", "/etc/resolv.conf", function(){
-							fs.unlink("/etc/resolv.conf.orig", function(){
-								log("resolv.conf has been restored. Now exit");	
-							});
-						});
+					fs.exec("rm /etc/resolv.conf && mv /etc/resolv.conf.orig /etc/resolv.conf", function(error){
+						if (error !== null) {
+							log('exec error: ' + error);
+						}
+						log("Local nameserver has been remove of resolv.conf. Now exit");	
 					});			
 				}
 			}
 			else {
 				log('Now exit');
-				process.exit(0);
 			}
+			process.exit(0);
 		}
 	}
 }();
