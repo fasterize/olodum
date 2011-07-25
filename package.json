@@ -10,8 +10,7 @@
   "keywords": ["speed"],
   "dependencies": {  },
   "devDependencies": {
-	"vows" : ">= 0.5.8",
-    "v8-profiler": ">= 0.0.2"
+	"vows" : ">= 0.5.8"
   },
   "engines": { "node": "0.4.x || 0.5.x" }
 }
