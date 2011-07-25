@@ -14,9 +14,11 @@ Defaults        env_keep += "NODE_ENV"
 
 // requires
 var exec = require('child_process').exec;
+var fs = require('fs');
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
+
 
 // Const
 var TTL = 5; // default TTL in DEV env
@@ -124,6 +126,7 @@ var olodum = function (){
 	return {
 		init : function() {
 			isDev = (process.env.NODE_ENV === 'dev');
+			osType = require('os').type();
 
 			// Temp : IP in the code, not in a global conf
 			var ipv4s = [];
@@ -153,15 +156,38 @@ var olodum = function (){
 			this.started = true;
 			//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
 			if (isDev) {
+				if(osType == "Darwin"){
 				// Change DNS Server IP with networksetup
-				exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
-					if (error !== null) {
-						log('exec error: ' + error);
-					}
-					log('Networksetup rules has been added');
-					//wait for calling callback if needed (in mac )
-					if (typeof callback === 'function') setTimeout(callback,500);
-				});
+					exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
+						if (error !== null) {
+							log('exec error: ' + error);
+						}
+						log('Networksetup rules has been added');
+					});
+				}
+				else{
+					newFile = fs.createWriteStream('/etc/resolv.conf.orig');     
+					oldFile = fs.createReadStream('/etc/resolv.conf');
+					
+					newFile.once('open', function(fd){
+						require('util').pump(oldFile, newFile, function(){
+							fs.open('/etc/resolv.conf', "a", 0644, function(err, fd) {
+								if (err){
+									log('exec error: ' + err);
+								}
+								fs.write(fd, "\nnameserver 127.0.0.1\n", undefined, undefined, function(err, written) {
+									if (err){
+										log('exec error: ' + error);
+									}
+									fs.closeSync(fd);
+									log('resolv.conf file has bees updated');
+								});
+							});
+						});
+					});
+				}
+				//wait for calling callback if needed (in mac)
+				if (typeof callback === 'function') setTimeout(callback,500);
 			}
 
 			//if DEV env, unregister local DNS server on exit else just trap exception
@@ -179,13 +205,23 @@ var olodum = function (){
 		stop : function () {
 			log('Stopping Olodum Server ...');
 			if (isDev) {
-			  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
-					if (error !== null) {
-						log('exec error: ' + error);
-			  	    }
-			  	    log('Networksetup rules has been removed. Now exit');
-					process.exit(0);
-				});
+				if(osType == "Darwin"){
+				  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
+						if (error !== null) {
+							log('exec error: ' + error);
+				  	    }
+				  	    log('Networksetup rules has been removed. Now exit');
+						process.exit(0);
+					});
+				} else {
+					fs.unlink("/etc/resolv.conf", function(){
+						fs.link("/etc/resolv.conf.orig", "/etc/resolv.conf", function(){
+							fs.unlink("/etc/resolv.conf.orig", function(){
+								log("resolv.conf has been restored. Now exit");	
+							});
+						});
+					});			
+				}
 			}
 			else {
 				log('Now exit');
