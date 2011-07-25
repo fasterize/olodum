@@ -200,6 +200,7 @@ var olodum = function (){
 							log('exec error: ' + error);
 						}
 						log('Networksetup rules has been removed. Now exit');
+						process.exit(0);
 					});
 				} else {
 					fs.exec("rm /etc/resolv.conf && mv /etc/resolv.conf.orig /etc/resolv.conf", function(error){
@@ -207,13 +208,14 @@ var olodum = function (){
 							log('exec error: ' + error);
 						}
 						log("Local nameserver has been remove of resolv.conf. Now exit");	
+						process.exit(0);
 					});			
 				}
 			}
 			else {
 				log('Now exit');
+				process.exit(0);
 			}
-			process.exit(0);
 		}
 	}
 }();
