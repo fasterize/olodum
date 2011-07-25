@@ -1,4 +1,7 @@
 see examples/
 
+TODO : 
+ - Ajouter ndns dans un serveur NPM privé ?
+
 Dépendances : 
 npm install vows

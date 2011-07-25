@@ -1,0 +1,17 @@
+{
+  "name": "nDNS",
+  "description": "Fasterize DNS server",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/fasterize/ndns.git"
+  },
+  "private": true,
+  "keywords": ["speed"],
+  "dependencies": {  },
+  "devDependencies": {
+	"vows" : ">= 0.5.8",
+    "v8-profiler": ">= 0.0.2"
+  },
+  "engines": { "node": "0.4.x || 0.5.x" }
+}
