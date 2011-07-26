@@ -158,7 +158,7 @@ var olodum = function (){
 			if (isDev) {
 				if(osType == "Darwin"){
 				// Change DNS Server IP with networksetup
-					exec('networksetup -setdnsservers "Wi-Fi" "127.0.0.1"', function (error) {
+					exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
 						if (error !== null) {
 							log('exec error: ' + error);
 						}
@@ -195,7 +195,7 @@ var olodum = function (){
 			log('Stopping Olodum Server ...');
 			if (isDev) {
 				if(osType == "Darwin"){
-					exec('Networksetup -setdnsservers "Wi-Fi" "Empty"', function (error) {
+					exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
 						if (error !== null) {
 							log('exec error: ' + error);
 						}
@@ -203,7 +203,7 @@ var olodum = function (){
 						process.exit(0);
 					});
 				} else {
-					exec("rm /etc/resolv.conf && mv /etc/resolv.conf.orig /etc/resolv.conf", function(error){
+					fs.exec("rm /etc/resolv.conf && mv /etc/resolv.conf.orig /etc/resolv.conf", function(error){
 						if (error !== null) {
 							log('exec error: ' + error);
 						}
