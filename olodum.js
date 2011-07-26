@@ -18,7 +18,7 @@ var fs = require('fs');
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
-
+var colors = require('colors');
 
 // Const
 var TTL = 5; // default TTL in DEV env
@@ -147,7 +147,7 @@ var olodum = function (){
 			return this;
 		},
 		start : function (callback) {
-			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV);
+			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV .green);
 			dnsServer.on("request", mainListener);
 			dnsServer.on("listening", function () {
 				 log('Olodum listening on port ' + BIND_PORT);
@@ -160,17 +160,21 @@ var olodum = function (){
 				// Change DNS Server IP with networksetup
 					exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
 						if (error !== null) {
-							log('exec error: ' + error);
+							log('exec error: '.red + error);
+							log("networksetup rules can't be modified" .red);
+							process.exit(0);
 						}
-						log('Networksetup rules has been added');
+						log('Networksetup rules has been added' .green);
 					});
 				}
 				else{
 					exec('mv /etc/resolv.conf /etc/resolv.conf.orig && echo "nameserver 127.0.0.1" >> /etc/resolv.conf', function (error) {
 						if (error !== null) {
-							log('exec error: ' + error);
+							log('exec error: '.red + error);
+							log("resolv.conf file was not modified" .red);
+							process.exit(0);
 						}
-						log('Local nameserver has been added in resolv.conf');
+						log('Local nameserver has been added in resolv.conf' .green);
 					
 					});
 				}
@@ -187,7 +191,7 @@ var olodum = function (){
 			}
 			else {
 				process.on('uncaughtException', function (err) {
-					log('Caught exception: ' + err);
+					log('Caught exception: '.red + err);
 				});
 			}
 		},
@@ -197,23 +201,23 @@ var olodum = function (){
 				if(osType == "Darwin"){
 					exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
 						if (error !== null) {
-							log('exec error: ' + error);
+							log('exec error: '.red + error);
 						}
-						log('Networksetup rules has been removed. Now exit');
+						log('Networksetup rules has been removed. Now exit' .green);
 						process.exit(0);
 					});
 				} else {
 					exec("mv -f /etc/resolv.conf.orig /etc/resolv.conf", function(error){
 						if (error !== null) {
-							log('exec error: ' + error);
+							log('exec error: '.red + error);
 						}
-						log("Local nameserver has been remove of resolv.conf. Now exit");	
+						log("Local nameserver has been remove of resolv.conf. Now exit" .green);	
 						process.exit(0);
 					});			
 				}
 			}
 			else {
-				log('Now exit');
+				log('Now exit' .green);
 				process.exit(0);
 			}
 		}

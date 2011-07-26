@@ -8,9 +8,11 @@
   },
   "private": true,
   "keywords": ["speed"],
-  "dependencies": {  },
+  "dependencies": { 
+		"colors" : ">= 0.5.0"
+  },
   "devDependencies": {
-	"vows" : ">= 0.5.8"
+		"vows" : ">= 0.5.8"
   },
   "engines": { "node": "0.4.x || 0.5.x" }
 }
