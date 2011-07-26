@@ -3,7 +3,7 @@
  - develop and isolate a resolver
  - use a configuration file (wait for vvo's one)
  - log with a syslog-like utility in PROD env (ain ?)
-
+ 
 process.env.NODE_DEV only accessible in sudo if added to the user env variable then exported :
 $ NODE_ENV=dev
 $ export NODE_ENV
