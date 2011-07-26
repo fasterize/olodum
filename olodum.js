@@ -166,7 +166,7 @@ var olodum = function (){
 					});
 				}
 				else{
-					exec('mv /etc/resolv.conf /etc/resolv.conf.orig && echo "\nnameserver 127.0.0.1 >> /etc/resolv.conf"', function (error) {
+					exec('mv /etc/resolv.conf /etc/resolv.conf.orig && echo "nameserver 127.0.0.1" >> /etc/resolv.conf', function (error) {
 						if (error !== null) {
 							log('exec error: ' + error);
 						}
