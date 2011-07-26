@@ -166,7 +166,7 @@ var olodum = function (){
 					});
 				}
 				else{
-					exec('cp /etc/resolv.conf /etc/resolv.conf.orig && echo "\nnameserver 127.0.0.1 >> /etc/resolv.conf"', function (error) {
+					exec('mv /etc/resolv.conf /etc/resolv.conf.orig && echo "\nnameserver 127.0.0.1 >> /etc/resolv.conf"', function (error) {
 						if (error !== null) {
 							log('exec error: ' + error);
 						}
@@ -203,7 +203,7 @@ var olodum = function (){
 						process.exit(0);
 					});
 				} else {
-					exec("rm /etc/resolv.conf && mv /etc/resolv.conf.orig /etc/resolv.conf", function(error){
+					exec("mv -f /etc/resolv.conf.orig /etc/resolv.conf", function(error){
 						if (error !== null) {
 							log('exec error: ' + error);
 						}
