@@ -2,5 +2,8 @@ start with : sudo node server.js
 
 sudo needed to bind to port 53
 
+TODO : 
+ - Ajouter ndns dans un serveur NPM privé ?
+
 Dépendances : 
 npm install vows

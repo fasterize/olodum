@@ -16,9 +16,11 @@ Defaults        env_keep += "NODE_ENV"
 
 // requires
 var exec = require('child_process').exec;
+var fs = require('fs');
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
+var colors = require('colors');
 
 // Const
 var TTL = 5; // default TTL in DEV env
@@ -126,6 +128,7 @@ var olodum = function (){
 	return {
 		init : function() {
 			isDev = (process.env.NODE_ENV === 'dev');
+			osType = require('os').type();
 
 			// Temp : IP in the code, not in a global conf
 			var ipv4s = [];
@@ -147,7 +150,7 @@ var olodum = function (){
 		},
 		start : function (callback) {
 			var that = this;
-			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV);
+			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV .green);
 			dnsServer.on("request", mainListener);
 			dnsServer.on("listening", function () {
 				log('Olodum listening on port ' + BIND_PORT);
@@ -157,15 +160,30 @@ var olodum = function (){
 			//setenv();
 			//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
 			if (isDev) {
+				if(osType == "Darwin"){
 				// Change DNS Server IP with networksetup
-				exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
-					if (error !== null) {
-						log('exec error: ' + error);
-					}
-					log('Networksetup rules has been added');
-					//wait for calling callback if needed (in mac ) test
-					if (typeof callback === 'function') callback();
-				});
+					exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
+						if (error !== null) {
+							log('exec error: '.red + error);
+							log("networksetup rules can't be modified" .red);
+							process.exit(0);
+						}
+						log('Networksetup rules has been added' .green);
+					});
+				}
+				else{
+					exec('mv /etc/resolv.conf /etc/resolv.conf.orig && echo "nameserver 127.0.0.1" >> /etc/resolv.conf', function (error) {
+						if (error !== null) {
+							log('exec error: '.red + error);
+							log("resolv.conf file was not modified" .red);
+							process.exit(0);
+						}
+						log('Local nameserver has been added in resolv.conf' .green);
+					});
+				}
+				// wait for calling callback if needed
+				// below 1000ms tests started before the whole initialization was done
+				if (typeof callback === 'function') callback();
 			}
 
 			//if DEV env, unregister local DNS server on exit else just trap exception
@@ -176,7 +194,7 @@ var olodum = function (){
 			}
 			else {
 				process.on('uncaughtException', function (err) {
-					log('Caught exception: ' + err);
+					log('Caught exception: '.red + err);
 				});
 			}
 		},
@@ -184,16 +202,26 @@ var olodum = function (){
 			log('Stopping Olodum Server ...');
 			//unsetenv();
 			if (isDev) {
-			  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
-					if (error !== null) {
-						log('exec error: ' + error);
-			  	    }
-			  	    log('Networksetup rules has been removed. Now exit');
-					process.exit(0);
-				});
+				if(osType == "Darwin"){
+					exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
+						if (error !== null) {
+							log('exec error: '.red + error);
+						}
+						log('Networksetup rules has been removed. Now exit' .green);
+						process.exit(0);
+					});
+				} else {
+					exec("mv -f /etc/resolv.conf.orig /etc/resolv.conf", function(error){
+						if (error !== null) {
+							log('exec error: '.red + error);
+						}
+						log("Local nameserver has been remove of resolv.conf. Now exit" .green);
+						process.exit(0);
+					});
+				}
 			}
 			else {
-				log('Now exit');
+				log('Now exit' .green);
 				process.exit(0);
 			}
 		}
