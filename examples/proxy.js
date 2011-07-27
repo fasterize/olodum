@@ -15,4 +15,6 @@ server.on("request", function(req, res) {
 });
 
 server.bind(LOCAL_PORT);
-//client.bind();
+console.log(client.bind.toString());
+console.log(server.address());
+client.bind(53,'208.67.222.222');
