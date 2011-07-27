@@ -133,7 +133,7 @@ var olodum = function (){
 			var ipv4s = [];
 			if (!isDev) {
 				TTL=300;
-				ipv4s.push('31.222.176.200');
+				ipv4s.push('31.222.182.138');
 				//ipv4s.push('31.222.176.201');
 			}
 			else {

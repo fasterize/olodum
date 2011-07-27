@@ -17,8 +17,8 @@ vows.describe('DNS testing in a PROD env').addBatch({
 					assert.isArray(addresses);
 					assert.isNull(err);
 		        },
-		        'and with returned IP = 31.222.176.200': function (err, addresses) {
-					assert.equal(addresses, "31.222.176.200");
+		        'and with returned IP = 31.222.182.138': function (err, addresses) {
+					assert.equal(addresses, "31.222.182.138");
 		        }
 			},
 			'a "www-org.monclient.org" request should return ' : {
@@ -62,8 +62,8 @@ vows.describe('DNS testing in a PROD env').addBatch({
 				'with no error' : function (err, addresses) {
 					assert.isNull(err);
 				},
-				'and a record defined as 31.222.176.200' : function(err, addresses){
-			        assert.equal(addresses,'31.222.176.200');
+				'and a record defined as 31.222.182.138' : function(err, addresses){
+			        assert.equal(addresses,'31.222.182.138');
 				}
 			}
 		}
