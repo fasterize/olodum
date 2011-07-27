@@ -176,9 +176,6 @@ var olodum = function (){
 						log('Local nameserver has been added in resolv.conf' .green);
 					});
 				}
-				// wait for calling callback if needed
-				// below 1000ms tests started before the whole initialization was done
-				if (typeof callback === 'function') callback();
 			}
 
 			//if DEV env, unregister local DNS server on exit else just trap exception
@@ -192,6 +189,9 @@ var olodum = function (){
 					log('Caught exception: '.red + err);
 				});
 			}
+			// wait for calling callback if needed
+			// below 1000ms tests started before the whole initialization was done
+			if (typeof callback === 'function') callback();
 		},
 		stop : function () {
 			log('Stopping Olodum Server ...');
@@ -217,7 +217,7 @@ var olodum = function (){
 			}
 			else {
 				log('Now exit' .green);
-				process.exit(0);
+				setTimeout(process.exit,100,0);
 			}
 		}
 	}
