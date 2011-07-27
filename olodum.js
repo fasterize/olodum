@@ -16,11 +16,10 @@ Defaults        env_keep += "NODE_ENV"
 
 // requires
 var exec = require('child_process').exec;
-var fs = require('fs');
 var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
-var colors = require('colors');
+require('colors');
 
 // Const
 var TTL = 5; // default TTL in DEV env
