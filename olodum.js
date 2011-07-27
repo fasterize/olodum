@@ -149,7 +149,7 @@ var olodum = function (){
 		},
 		start : function (callback) {
 			var that = this;
-			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV .green);
+			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV);
 			dnsServer.on("request", mainListener);
 			dnsServer.on("listening", function () {
 				log('Olodum listening on port ' + BIND_PORT);
