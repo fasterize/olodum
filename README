@@ -1,4 +1,6 @@
-see examples/
+start with : sudo node server.js
+
+sudo needed to bind to port 53
 
 Dépendances : 
 npm install vows
