@@ -74,14 +74,13 @@ var olodum = function (){
 				// This server only respond to A or AAAA or NS query
 				if (type == ndns.ns_type.ns_t_a || (type == ndns.ns_type.ns_t_aaaa && this.ipv6s.length > 0) || (type == ndns.ns_type.ns_t_ns) ) {
 					res.header.nscount = 1;		// number of NS records
+					first = ndns.p_type_syms[type];
 					//add all records in ips array to response 
 					if (type == ndns.ns_type.ns_t_a) {
 						ips = this.ipv4s;
-						first = "A";
 					}
 					else if (type == ndns.ns_type.ns_t_aaaa) {
 						ips = this.ipv6s;
-						first = "A";
 					}
 					else if (type == ndns.ns_type.ns_t_ns) {
 						ips = this.nss;
@@ -89,8 +88,7 @@ var olodum = function (){
 					//set number of Resource Record
 					res.header.ancount = ips.length;
 					for (var j = 0; j < ips.length; j++) {
-						//console.log(dnsServer.p_type_syms)
-						res.addRR(name,TTL,"IN","A",ips[j]);
+						res.addRR(name,TTL,"IN",first,ips[j]);
 					} 
 					//add an NS record for Authority Response or A record for NS query
 					if (first === 'A') {
@@ -112,6 +110,9 @@ var olodum = function (){
 				//set Recursive Desire bit (to resolve CNAME for example)
 				req.setHeader({rd: 1});
 			    c_req.on("response", function (c_res) {
+					//in case of error, answer 127.0.0.1
+					//if (error !== null) {
+					//}
 					//hook DNS response with local IP if "fasterized.com" domain (or prospect/client domain)
 					for (var j = 0 ; j < c_res.rr.length ; j++) {
 						if (c_res.rr[j].type !== 2 && c_res.rr[j].name.indexOf('.fasterized.com') !== -1) {
@@ -140,8 +141,6 @@ var olodum = function (){
 			//ipv6s.push('2002:0:0:0:0:0:1fde:b0c8');
 			dnsServer.nss = [];
 			dnsServer.nss.push('ns1.fasterized.com');
-			var ips;
-			var first;
 			return this;
 		},
 		start : function (callback) {
