@@ -1,6 +1,5 @@
 /*
 TODO
- - integrate with server.js (require + process.env.NODE_ENV ?)
  - tests register/unregister local dns server
 */
 
