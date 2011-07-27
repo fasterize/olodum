@@ -1,4 +1,4 @@
-var exec = require('child_process').exec
+/*var exec = require('child_process').exec
 
 
 for (var i=0 ; i < MAX ; i++) {
@@ -6,3 +6,4 @@ for (var i=0 ; i < MAX ; i++) {
 	//nothing	
 	});
 }
+*/

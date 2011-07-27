@@ -1,2 +1,1 @@
-var cluster = require('cluster');
-/bin/bash: :x: command not found
+//var cluster = require('cluster');
