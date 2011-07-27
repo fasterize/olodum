@@ -5,6 +5,7 @@
  - use a configuration file (wait for vvo's one)
  - log with a syslog-like utility in PROD env (ain ?) + debug level
  - add possibility to return 127.0.0.1 when leparisien.fr requested (leparisien.fr = prospect, based on configuration file)
+ - move IPs properties to olodum object and not dnsServer object
 
 process.env.NODE_DEV only accessible in sudo if added to the user env variable then exported :
 $ NODE_ENV=dev
@@ -71,24 +72,25 @@ var olodum = function (){
 			if (!isDev) {
 				var type = req.q[i].type
 				// This server only respond to A or AAAA or NS query
-				if (type == ndns.ns_type.ns_t_a || (type == ndns.ns_type.ns_t_aaaa && ipv6s.length > 0) || (type == ndns.ns_type.ns_t_ns) ) {
+				if (type == ndns.ns_type.ns_t_a || (type == ndns.ns_type.ns_t_aaaa && this.ipv6s.length > 0) || (type == ndns.ns_type.ns_t_ns) ) {
 					res.header.nscount = 1;		// number of NS records
 					//add all records in ips array to response 
 					if (type == ndns.ns_type.ns_t_a) {
-						ips = ipv4s;
+						ips = this.ipv4s;
 						first = "A";
 					}
 					else if (type == ndns.ns_type.ns_t_aaaa) {
-						ips = ipv6s;
+						ips = this.ipv6s;
 						first = "A";
 					}
 					else if (type == ndns.ns_type.ns_t_ns) {
-						ips = nss;
+						ips = this.nss;
 					}
-					//set unmber of Resource Record
+					//set number of Resource Record
 					res.header.ancount = ips.length;
 					for (var j = 0; j < ips.length; j++) {
-						res.addRR(name,TTL,"IN",p_type_syms[type],ips[j]);
+						//console.log(dnsServer.p_type_syms)
+						res.addRR(name,TTL,"IN","A",ips[j]);
 					} 
 					//add an NS record for Authority Response or A record for NS query
 					if (first === 'A') {
@@ -130,19 +132,14 @@ var olodum = function (){
 			osType = require('os').type();
 
 			// Temp : IP in the code, not in a global conf
-			var ipv4s = [];
-			if (!isDev) {
-				TTL=300;
-				ipv4s.push('31.222.182.138');
-				//ipv4s.push('31.222.176.201');
-			}
-			else {
-				ipv4s.push('127.0.0.1');
-			}
-			var ipv6s = [];
+			dnsServer.ipv4s = [];
+			dnsServer.ipv4s.push('31.222.182.138');
+			if (!isDev) TTL=300
+
+			dnsServer.ipv6s = [];
 			//ipv6s.push('2002:0:0:0:0:0:1fde:b0c8');
-			var nss = [];
-			nss.push('ns1.fasterized.com');
+			dnsServer.nss = [];
+			dnsServer.nss.push('ns1.fasterized.com');
 			var ips;
 			var first;
 			return this;
@@ -159,7 +156,7 @@ var olodum = function (){
 			//setenv();
 			//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
 			if (isDev) {
-				if(osType == "Darwin"){
+				if(osType === "Darwin"){
 				// Change DNS Server IP with networksetup
 					exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
 						if (error !== null) {
