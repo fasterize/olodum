@@ -1,8 +1,10 @@
 /* TODO : 
+ - setenv/unsetenv
  - refactor ipv4/ipv6/ns ? (=> use an object ?)
  - develop and isolate a resolver
  - use a configuration file (wait for vvo's one)
- - log with a syslog-like utility in PROD env (ain ?)
+ - log with a syslog-like utility in PROD env (ain ?) + debug level
+ - add possibility to return 127.0.0.1 when leparisien.fr requested (leparisien.fr = prospect, based on configuration file)
 
 process.env.NODE_DEV only accessible in sudo if added to the user env variable then exported :
 $ NODE_ENV=dev
@@ -49,20 +51,20 @@ var olodum = function (){
 		// duplicate query headers in response
 	    res.setHeader(req.header);
 
+		//set some response headers
+		res.header.aa = 1;         // authoritative answer
+		res.header.ra = 0;
+		res.header.qr = 1;			// Message type = response
+		res.header.rd = 0;
+		res.header.arcount = 0;		// number of Additional Records
+
+		// domain name queried
+		var name = (req.q[0].name === '.' ? '' : req.q[0].name);
+
 		//process all subqueries
 	    for (var i = 0; i < req.q.length; i++) {
 			//parse query and add it to the response object
 			res.addQuestion(req.q[i]);
-
-			//set some response headers
-			res.header.aa = 1;         // authoritative answer
-			res.header.ra = 0;
-			res.header.qr = 1;			// Message type = response
-			res.header.rd = 0;
-			res.header.arcount = 0;		// number of Additional Records
-	
-			// domain name queried
-			var name = (req.q[0].name === '.' ? '' : req.q[0].name);
 
 			// only respond to query ending with fasterized.com, otherwise proxy request
 			if (!isDev) {
@@ -107,7 +109,7 @@ var olodum = function (){
 				//set Recursive Desire bit (to resolve CNAME for example)
 				req.setHeader({rd: 1});
 			    c_req.on("response", function (c_res) {
-					//hook DNS response with local IP if "fasterized.com" domain
+					//hook DNS response with local IP if "fasterized.com" domain (or prospect/client domain)
 					for (var j = 0 ; j < c_res.rr.length ; j++) {
 						if (c_res.rr[j].type !== 2 && c_res.rr[j].name.indexOf('.fasterized.com') !== -1) {
 							c_res.rr[j].rdata.a = '127.0.0.1'
@@ -144,13 +146,15 @@ var olodum = function (){
 			return this;
 		},
 		start : function (callback) {
+			var that = this;
 			log('Starting process '+ process.pid +' in environment : ' + process.env.NODE_ENV);
 			dnsServer.on("request", mainListener);
 			dnsServer.on("listening", function () {
-				 log('Olodum listening on port ' + BIND_PORT);
+				log('Olodum listening on port ' + BIND_PORT);
+				that.started = true;
 			});
 			dnsServer.bind(BIND_PORT);
-			this.started = true;
+			//setenv();
 			//if ENV DEV, register as a local DNS (ENV DEV = mac os / Wifi)
 			if (isDev) {
 				// Change DNS Server IP with networksetup
@@ -159,8 +163,8 @@ var olodum = function (){
 						log('exec error: ' + error);
 					}
 					log('Networksetup rules has been added');
-					//wait for calling callback if needed (in mac )
-					if (typeof callback === 'function') setTimeout(callback,500);
+					//wait for calling callback if needed (in mac ) test
+					if (typeof callback === 'function') callback();
 				});
 			}
 
@@ -178,6 +182,7 @@ var olodum = function (){
 		},
 		stop : function () {
 			log('Stopping Olodum Server ...');
+			//unsetenv();
 			if (isDev) {
 			  	child = exec('Networksetup -setdnsservers "AirPort" "Empty"', function (error) {
 					if (error !== null) {
