@@ -1,4 +1,4 @@
-/* TODO : 
+/* TODO :
  - setenv/unsetenv
  - refactor ipv4/ipv6/ns ? (=> use an object ?)
  - develop and isolate a resolver
@@ -17,7 +17,7 @@ Defaults        env_keep += "NODE_ENV"
 
 // requires
 var exec = require('child_process').exec;
-var ndns = require('./lib/ndns');
+var ndns = require('./forks/ndns/lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
 require('colors');
@@ -75,7 +75,7 @@ var olodum = function (){
 				if (type == ndns.ns_type.ns_t_a || (type == ndns.ns_type.ns_t_aaaa && this.ipv6s.length > 0) || (type == ndns.ns_type.ns_t_ns) ) {
 					res.header.nscount = 1;		// number of NS records
 					first = ndns.p_type_syms[type];
-					//add all records in ips array to response 
+					//add all records in ips array to response
 					if (type == ndns.ns_type.ns_t_a) {
 						ips = this.ipv4s;
 					}
@@ -89,10 +89,10 @@ var olodum = function (){
 					res.header.ancount = ips.length;
 					for (var j = 0; j < ips.length; j++) {
 						res.addRR(name,TTL,"IN",first,ips[j]);
-					} 
+					}
 					//add an NS record for Authority Response or A record for NS query
 					if (first === 'A') {
-						res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');					
+						res.addRR(name, 10, "IN", "NS", 'ns1.fasterized.com');
 					}
 					else {
 						res.addRR('ns1.fasterized.com', 10, "IN", "A", '31.222.176.247');
