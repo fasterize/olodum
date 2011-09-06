@@ -70,7 +70,7 @@ suite.addBatch({
 			        assert.match(addresses, /[^0-9]*/);
 				}
 			},
-			'a "toto.fasterized.com" NS request should return ns1.fasterized.com': {
+			/*'a "toto.fasterized.com" NS request should return ns1.fasterized.com': {
 				topic: function(){
 					var cb = this.callback;
 					exec('host -t "NS" toto.fasterized.com', function (error,stdout) {
@@ -84,7 +84,7 @@ suite.addBatch({
 				'and a record defined as ns1.fasterized.com' : function(err, addresses){
 			        assert.include(addresses,'ns1.fasterized.com');
 				}
-			},
+			},*/
 			'a "tata.fasterized.com" A request should return ': {
 				topic: function(){
 					var cb = this.callback;
