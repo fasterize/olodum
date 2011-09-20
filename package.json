@@ -1,20 +1,2 @@
 {
-  "name": "Olodum",
-  "description": "Fasterize DNS server wrapper",
-  "version": "0.0.2",
-  "repository": {
-    "type": "git",
-    "url": "https://vvo@github.com/fasterize/olodum.git"
-  },
-  "private": true,
-  "keywords": ["dns"],
-  "dependencies": {
-    "colors": ">= 0.5.0"
-  },
-  "devDependencies": {
-    "vows": ">= 0.5.8"
-  },
-  "engines": {
-    "node": "0.4.x || 0.5.x"
-  }
 }
