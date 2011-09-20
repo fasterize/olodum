@@ -17,7 +17,7 @@ Defaults        env_keep += "NODE_ENV"
 
 // requires
 var exec = require('child_process').exec;
-var ndns = require('./forks/ndns/lib/ndns');
+var ndns = require('ndns/lib/ndns.js');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
 require('colors');
