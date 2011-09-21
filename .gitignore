@@ -32,3 +32,5 @@ Icon?
 node_modules
 npm-debug.log
 v8.log
+
+*.sublime-workspace

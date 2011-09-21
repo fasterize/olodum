@@ -1,3 +1,0 @@
-[submodule "forks/ndns"]
-	path = forks/ndns
-	url = git@github.com:fasterize/ndns.git
