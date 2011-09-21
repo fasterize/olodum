@@ -7,13 +7,12 @@
     "url": "https://vvo@github.com/fasterize/olodum.git"
   },
   "private": true,
-  "keywords": ["dns"],
   "dependencies": {
-    "colors": ">= 0.5.0",
+    "colors": "0.5.0",
  	"ndns": "git+ssh://git@github.com:fasterize/ndns.git"
   },
   "devDependencies": {
-    "vows": ">= 0.5.8"
+    "vows": "0.5.11"
   },
   "engines": {
     "node": "0.4.x || 0.5.x"
