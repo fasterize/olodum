@@ -9,7 +9,8 @@
   "private": true,
   "dependencies": {
     "colors": "0.5.0",
- 	"ndns": "git+ssh://git@github.com:fasterize/ndns.git"
+ 	"ndns": "git+ssh://git@github.com:fasterize/ndns.git",
+ 	"configuration": "git+ssh://git@github.com:fasterize/configuration.git"
   },
   "devDependencies": {
     "vows": "0.5.11"
