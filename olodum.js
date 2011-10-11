@@ -17,10 +17,10 @@ Defaults        env_keep += "NODE_ENV"
 
 // requires
 var exec = require('child_process').exec;
-var ndns = require('ndns/lib/ndns');
+var ndns = require('./lib/ndns');
 var dnsServer = ndns.createServer('udp4');
 var client = ndns.createClient('udp4');
-require('colors');
+// require('colors');
 
 // Const
 var TTL = 5; // default TTL in DEV env
@@ -106,23 +106,32 @@ var olodum = function (){
 			}
 			//DEV env : proxy request DNS except "fasterized.com" domains
 			else {
-				var c_req = client.request(REMOTE_PORT, REMOTE_HOST);
-				//set Recursive Desire bit (to resolve CNAME for example)
-				req.setHeader({rd: 1});
-			    c_req.on("response", function (c_res) {
-					//in case of error, answer 127.0.0.1
-					//if (error !== null) {
-					//}
-					//hook DNS response with local IP if "fasterized.com" domain (or prospect/client domain)
-					for (var j = 0 ; j < c_res.rr.length ; j++) {
-						if (c_res.rr[j].type !== 2 && c_res.rr[j].name.indexOf('.fasterized.com') !== -1) {
-							c_res.rr[j].rdata.a = '127.0.0.1'
-							c_res.rr[j].rdata[0] = '127.0.0.1'
+				// if it's a .fasterized. domain that is queried, reply always with 127.0.0.1
+				if (name.indexOf('.fasterized.') !== -1) {
+					res.header.ancount = 1;
+					res.header.nscount = 0;
+					res.addRR(name,TTL,"IN","A","127.0.0.1");
+					res.send()
+				}
+				else {
+					var c_req = client.request(REMOTE_PORT, REMOTE_HOST);
+					//set Recursive Desire bit (to resolve CNAME for example)
+					req.setHeader({rd: 1});
+				    c_req.on("response", function (c_res) {
+						//in case of error, answer 127.0.0.1
+						//if (error !== null) {
+						//}
+						//hook DNS response with local IP if "fasterized.com" domain (or prospect/client domain)
+						for (var j = 0 ; j < c_res.rr.length ; j++) {
+							if (c_res.rr[j].type !== 2 && c_res.rr[j].name.indexOf('.fasterized.') !== -1) {
+								c_res.rr[j].rdata.a = '127.0.0.1'
+								c_res.rr[j].rdata[0] = '127.0.0.1'
+							}
 						}
-					}
-					res.send(c_res);
-			    });
-			    c_req.send(req);
+						res.send(c_res);
+				    });
+				    c_req.send(req);
+			    }
 			}
 		}
 	}
@@ -159,11 +168,11 @@ var olodum = function (){
 				// Change DNS Server IP with networksetup
 					exec('networksetup -setdnsservers "AirPort" "127.0.0.1"', function (error) {
 						if (error !== null) {
-							log('exec error: '.red + error);
-							log("networksetup rules can't be modified" .red);
+							log('exec error: ' + error);
+							log("networksetup rules can't be modified" );
 							process.exit(0);
 						}
-						log('Networksetup rules has been added' .green);
+						log('Networksetup rules has been added');
 					});
 				}
 				else{

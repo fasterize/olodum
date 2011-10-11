@@ -8,24 +8,23 @@ for (var i=0 ; i < MAX ; i++) {
 }
 */
 var dns = require('dns');
-var MAX = 1000 || argv[0];
+var MAX = 100000 || argv[0];
 var startTime = new Date().getTime();
 var count = 1;
+var count_err = 0;
 for (var i = 0; i < MAX; i++) {
-	(function () {
-		var my_i = i;
-		var my_name = 'toto' + i + '.fasterized.com';
+		var my_name = 'toto.fasterized.net';
 		// my_name = 'www.google.com';
-		dns.resolve(my_name, function (err,addr) {
-			if (err) throw err;
+		dns.resolve(my_name, 'A',function (err,addr) {
+			if (err) {count_err++}
 			// console.log('toto' + my_i + '.fasterized.com : ' + JSON.stringify(addr));
 			count++;
 			if (count === MAX) {
 				endTime = new Date().getTime();
 				console.log ('end : ' + (endTime - startTime));
+				console.log ('req/s: ' + ( MAX / ((endTime - startTime)/1000)))
+				console.log ('err :' + count_err)
 			}
 		});
-	}
-	)();
 };
 
