@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+var domain = process.argv[2];
+var target = process.argv[3];
+
+domain = !domain ? '' : domain;
+target = '127.0.0.1' && target;
+
+require('../lib/olodum').init(domain, target).start();
+
