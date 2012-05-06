@@ -1,1 +1,1 @@
-require('./olodum').olodum.init().start();
+require('./lib/olodum').init().start();
