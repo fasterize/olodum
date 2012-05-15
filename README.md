@@ -41,4 +41,3 @@ TODO
 ----
  * Tester le déploiement en prod
  * Ajouter ndns dans un serveur NPM privé ?
- * Renommer le README en README.md ?
