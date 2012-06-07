@@ -1,5 +1,5 @@
 {
-  "name": "Olodum",
+  "name": "olodum",
   "description": "dev DNS server",
   "version": "0.2.0",
   "repository": {
@@ -15,6 +15,9 @@
     "vows": "0.5.11"
   },
   "engines": {
-    "node": ""
-  }
+    "node": "<=0.7.7",
+    "os" : [ "!win32" ]
+  },
+  "bin" : { "olodum" : "./olodum)" },
+  "scripts" : { "test" : "vows --spec" }
 }
