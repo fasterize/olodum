@@ -8,7 +8,6 @@
     "url": "git://github.com/fasterize/olodum.git"
   },
   "preferGlobal": true,
-  "private": true,
   "dependencies": {
     "ndns": "git://github.com/stefounet/ndns.git",
     "growl": ""
