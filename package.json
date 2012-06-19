@@ -2,10 +2,12 @@
   "name": "olodum",
   "description": "dev DNS server",
   "version": "0.2.0",
+  "author": "stephane rios (http://twiter.com/@stefounet)",
   "repository": {
     "type": "git",
-    "url": "https://vvo@github.com/fasterize/olodum.git"
+    "url": "git://github.com/fasterize/olodum.git"
   },
+  "preferGlobal": true,
   "private": true,
   "dependencies": {
     "ndns": "git://github.com/stefounet/ndns.git",
@@ -16,8 +18,21 @@
   },
   "engines": {
     "node": "<=0.7.7",
-    "os" : [ "!win32" ]
+    "os": [
+      "!win32"
+    ]
   },
-  "bin" : { "olodum" : "./olodum)" },
-  "scripts" : { "test" : "vows --spec" }
+  "keywords": [
+    "development",
+    "DNS",
+    "hostname",
+    "cname"
+  ],
+  "bin": "./bin/olodum",
+  "scripts": {
+    "test": "vows --spec",
+    "start": "node server.js"
+  },
+  "optionalDependencies": {},
+  "main": "olodum"
 }
