@@ -1,43 +1,131 @@
 OLODUM
 ======
 
+/etc/host made easy.
+
+Tired of editing your /etc/host ? Olodum act as a local filtering DNS proxy : 
+
+ * every DNS request containing a domain name that is configured to be catched will returned the IP you specify, 
+ * every other request will be forwarded to your real DNS servers
+
+Why _olodum_ ? Because i'm a fan of Michael. Just look at the video clip "They don't care about us"
+
 Requirements
 ------------
 
-Nodejs 0.4.12 http://nodejs.org/ (Using NVM)
-Npm 1.0.27 http://npmjs.org/
-Git
+NodeJS >= v0.4 (http://nodejs.org/)
+Npm for node version < 0.6 (http://npmjs.org/)
 
-See https://github.com/fasterize/FasterizeEngine/wiki/Dev-Environment-Requirements for installation
-directives and tips
+Modules installation
+-----------------
+Olodum should be used and installed globally (npm install without sudo will fail)
 
-Cloning project and modules installation
-----------------------------------------
+    sudo npm install olodum -g
 
-```bash
-# Your dev directory, choose one, in prod it's /F
-cd [directory]
+Supported env
+------------
+* linux (ubuntu,debian)
+* macosx (10.5, 10.6, 10.7, wifi only)
+* that's all
 
-# Clone project & all submodules recursively
-git clone git@github.com:fasterize/olodum.git --recursive && cd olodum
-
-# Install all required packages, this will read package.json
-npm install
-
-# Done
-```
+windows port in the TODO list
 
 Usage
------
-start with : sudo node server.js
+====
 
-sudo needed to bind to port 53
+    sudo olodum [host] [ip|hostname]
+
+where :
+
+* host is the filter, default to blank (=> every DNS are catched)
+* ip is the IP address to respond when a domain name matches _host_, default to ````127.0.0.1````
+* or hostname is the original hostname (before olodum is activated). hostname is first resolved to an IP address 
+
+sudo is needed to bind to local port 53 (DNS server)
+
+You should be able to surf as usual, except for the filterd domain name(s).
+When you are finished, just type ````Ctrl + C```` to exit and revert to the previous and original DNS configuration of your box.
+
+#Use cases
+##/etc/host replacement
+When developping proxy, web or cache servers, inserting lines in /etc/host can quickly be cumbersome and boring. You've got plenty of commented lines, don't know if your configuration is up to date regarding one of the domain names your are testing, you're doing ````host```` and ````dig```` to find real IPs to put in this file, ... 
+Just use Olodum !
+
+Want to serve a new www.google.com site ? Just start your local webserver and use :
+
+````sudo olodum www.google.com 127.0.0.1````
+ 
+Want to map www.gooooogle.com on www.google.com to see if goog uses vhosts ? Just use :
+
+````sudo olodum www.gooooogle.com www.google.com````
+
+##wildcard domain names
+If you've got wildcard domain names to point to one IP, you need to enter each line in your /etc/host
+With olodum, just use the fixed portion of the domain name in the filter : 
+
+````sudo olodum google````
+
+In this example, every DNS request containing google will be answered with 127.0.0.1 (default IP). It's equivalent to these lines in /etc/host :
+
+    127.0.0.1 www.google.com
+    127.0.0.1 mail.google.com
+    [.... snip ....]
+    127.0.0.1 plus.google.com
+    127.0.0.1 maps.google.com
+
+## CNAME
+When you're setting up a proxy, a cache, a CDN or even better, a frontend optimizer for your live servers and you want to test if their configuration is ok, instead of using one of the provider IP, use the future used CNAME as the target for olodum :
+
+````sudo olodum www.fasterize.com www.fasterize.com.fasterized.org```` 
+
+and you're ready to go and test your _fasterized_ website !
+
+##blackhole webperf test 
+Imagine a world where facebook, google+ or twitter widgets were 100% uptime ... Huh ?!
+So, test your website with olodum activated for one of these domains and see the result on the loading time of your site !
+
+````sudo olodum twitter````
+
+##temporary AdBlocker
+Start a web server on 127.0.0.1:80
+
+````sudo node -e "require('http').createServer(function(req,res) {res.end('')}).listen(80)"````
+
+Start olodum
+
+````sudo olodum crappyadserver.net````
+
+Hahaha ! bye-bye crappy AdServers !
+
+(Starting the web server will be included in future version of olodum, list of adServers too.)
 
 Tests
------
-sudo sh test-runner.sh
+===
+    sudo npm test
+
+Inner working
+=============
+##linux
+1. read and backup /etc/resolv.conf
+2. write a new /etc/resolv.conf with 127.0.0.1 as the DNS server
+3. start the DNS server
+4. serve DNS responses based on filter or forward the request to the DNS servers detected in /etc/resolv.conf
+##macosx
+1. read and backup /etc/resolv.conf
+2. change the network configuration with 127.0.0.1 as the DNS server
+3. start the DNS server
+4. serve DNS responses based on filter or forward the request to the DNS servers detected in /etc/resolv.conf
 
 TODO
-----
- * Tester le déploiement en prod
- * Ajouter ndns dans un serveur NPM privé ?
+====
+
+ * revert to a proper state when uncaught exception
+ * windows port
+ * macosx ethernet and fixed IP configs
+ * AdBlocker & blakchole management based on blacklists
+ * regex on host
+ * array of hosts
+
+Licence
+====
+Do what you want. Have fun with JS.
