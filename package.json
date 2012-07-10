@@ -1,7 +1,7 @@
 {
   "name": "olodum",
   "description": "dev DNS server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "stephane rios (http://twiter.com/@stefounet)",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
   "preferGlobal": true,
   "dependencies": {
     "ndns": "git://github.com/stefounet/ndns.git",
+    "optimist": "",
     "growl": ""
   },
   "devDependencies": {
@@ -29,7 +30,7 @@
   ],
   "bin": "./bin/olodum",
   "scripts": {
-    "test": "vows --spec",
+    "test": "vows test/server-test.js --spec",
     "start": "node server.js"
   },
   "optionalDependencies": {},

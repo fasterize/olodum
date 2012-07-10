@@ -14,13 +14,15 @@ Requirements
 ------------
 
 NodeJS >= v0.4 (http://nodejs.org/)
-Npm for node version < 0.6 (http://npmjs.org/)
 
 Modules installation
 -----------------
 Olodum should be used and installed globally (npm install without sudo will fail)
 
     sudo npm install olodum -g
+
+Sorry, installation fails with this method :-(
+Will be fixed in the next release
 
 Supported env
 ------------
@@ -33,13 +35,13 @@ windows port in the TODO list
 Usage
 ====
 
-    sudo olodum [host] [ip|hostname]
+    sudo olodum [host1] [host2] [-t target]
 
 where :
 
-* host is the filter, default to blank (=> every DNS are catched)
-* ip is the IP address to respond when a domain name matches _host_, default to ````127.0.0.1````
-* or hostname is the original hostname (before olodum is activated). hostname is first resolved to an IP address 
+* host1, host2 are the filters, default to blank (=> every DNS requests are catched). Can be a part of a hostname
+* target is the IP address to respond when a domain name matches _host_, default to ````127.0.0.1````
+* if target is not an IP then target is first resolved to an IP address (before olodum is started) 
 
 sudo is needed to bind to local port 53 (DNS server)
 
@@ -124,7 +126,6 @@ TODO
  * macosx ethernet and fixed IP configs
  * AdBlocker & blakchole management based on blacklists
  * regex on host
- * array of hosts
 
 Licence
 ====

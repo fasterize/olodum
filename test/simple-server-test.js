@@ -1,6 +1,6 @@
 /*
 TODO
- - tests multiple start/stop of olodum (now fails)
+ - tests register/unregister local dns server
 */
 
 var vows = require('vows');
@@ -8,39 +8,8 @@ var assert = require('assert');
 var olodum = require('../lib/olodum');
 var exec = require('child_process').exec;
 
-var suite = vows.describe('DNS testing ');
-suite.addBatch({
-	'Starting olodum server' : {
-		topic: function() {
-			var cb = this.callback;
-			olodum.init(undefined, undefined,false,function(){setTimeout(cb, 500);});//wait for olodum to start before triggering callback
-		},
-		'works': function() {
-			assert.isTrue(olodum.started);
-		}
-	}
-}).addBatch({
-		'with default config' : {
-			'a "www.mycustomer.com" request should return ': {
-		    topic: function () { 
-					var cb = this.callback;
-					exec('host www.mycustomer.com', function (error,stdout) {
-						cb(error,stdout);
-					  });
-		      },
-		      'with no error': function (err, addresses) {
-            assert.isNull(err);
-		        },
-		        'and with returned IP = 127.0.0.1': function (err, addresses) {
-            assert.include(addresses, "127.0.0.1");
-		        }
-			},
-			teardown : function(){
-        var cb = this.callback;
-				olodum.stop(cb);
-			}
-		}
-})/*.addBatch({
+var suite2 = vows.describe('DNS testing ');
+suite2.addBatch({
 	'Starting olodum server' : {
 		topic: function() {
 			var cb = this.callback;
@@ -72,6 +41,6 @@ suite.addBatch({
 				olodum.stop(cb);
 			}
 		}
-})*/.export(module);
+}).export(module);
 
 
