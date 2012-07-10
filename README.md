@@ -1,4 +1,4 @@
-OLODUM
+OLODUM ![olodum logo](https://github.com/fasterize/olodum/blob/master/olodum.png?raw=true)
 ======
 
 /etc/host made easy.
