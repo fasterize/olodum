@@ -121,7 +121,6 @@ Inner working
 TODO
 ====
 
- * revert to a proper state when uncaught exception
  * windows port
  * AdBlocker & blakchole management based on blacklists
  * regex on host
