@@ -1,7 +1,7 @@
 {
   "name": "olodum",
   "description": "dev DNS server",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "author": "stephane rios (http://twiter.com/@stefounet)",
   "repository": {
     "type": "git",
