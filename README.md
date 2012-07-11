@@ -111,19 +111,18 @@ Inner working
 1. read and backup /etc/resolv.conf
 2. write a new /etc/resolv.conf with 127.0.0.1 as the DNS server
 3. start the DNS server
-4. serve DNS responses based on filter or forward the request to the DNS servers detected in /etc/resolv.conf
+4. serve DNS responses based on filter or forward the request to the first DNS server detected in /etc/resolv.conf
 ##macosx
 1. read and backup /etc/resolv.conf
 2. change the network configuration with 127.0.0.1 as the DNS server
 3. start the DNS server
-4. serve DNS responses based on filter or forward the request to the DNS servers detected in /etc/resolv.conf
+4. serve DNS responses based on filter or forward the request to the first DNS server detected in /etc/resolv.conf
 
 TODO
 ====
 
  * revert to a proper state when uncaught exception
  * windows port
- * macosx ethernet and fixed IP configs
  * AdBlocker & blakchole management based on blacklists
  * regex on host
 
