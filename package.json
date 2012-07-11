@@ -1,7 +1,7 @@
 {
   "name": "olodum",
   "description": "dev DNS server",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "stephane rios (http://twiter.com/@stefounet)",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "vows": "0.5.11"
   },
   "engines": {
-    "node": "<=0.7.7",
+    "node": ">=0.4.x",
     "os": [
       "!win32"
     ]
@@ -30,6 +30,7 @@
   ],
   "bin": "./bin/olodum",
   "scripts": {
+    "postinstall": "chmod +x utils/getOriginalDNS.sh utils/getPrimaryService.sh",
     "test": "vows test/server-test.js --spec",
     "start": "node server.js"
   },
