@@ -27,7 +27,7 @@ Will be fixed in the next release
 Supported env
 ------------
 * linux (ubuntu,debian)
-* macosx (10.5, 10.6, 10.7, wifi only)
+* macosx
 * that's all
 
 windows port in the TODO list
@@ -45,7 +45,7 @@ where :
 
 sudo is needed to bind to local port 53 (DNS server)
 
-You should be able to surf as usual, except for the filterd domain name(s).
+You should be able to surf as usual, except for the filtered domain name(s).
 When you are finished, just type ````Ctrl + C```` to exit and revert to the previous and original DNS configuration of your box.
 
 #Use cases
@@ -112,6 +112,7 @@ Inner working
 2. write a new /etc/resolv.conf with 127.0.0.1 as the DNS server
 3. start the DNS server
 4. serve DNS responses based on filter or forward the request to the first DNS server detected in /etc/resolv.conf
+
 ##macosx
 1. read and backup /etc/resolv.conf
 2. change the network configuration with 127.0.0.1 as the DNS server
