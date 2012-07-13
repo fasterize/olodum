@@ -103,6 +103,12 @@ Tests
 ===
     sudo npm test
 
+Tests are not complete, must work on it.
+
+Caveats
+=======
+Sometimes resolving hosts through olodum will fail and your request will hang. Need to fix this.
+
 Inner working
 =============
 ##linux
@@ -123,6 +129,7 @@ TODO
  * windows port
  * AdBlocker & blakchole management based on blacklists
  * regex on host
+ * tests
 
 Licence
 ====
