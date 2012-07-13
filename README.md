@@ -17,12 +17,10 @@ NodeJS >= v0.4 (http://nodejs.org/)
 
 Modules installation
 -----------------
-Olodum should be used and installed globally (npm install without sudo will fail)
+Olodum should be used and installed globally 
 
-    sudo npm install olodum -g
+    [sudo] npm install olodum -g
 
-Sorry, installation fails with this method :-(
-Will be fixed in the next release
 
 Supported env
 ------------
@@ -40,7 +38,7 @@ Usage
 where :
 
 * host1, host2 are the filters, default to blank (=> every DNS requests are catched). Can be a part of a hostname
-* target is the IP address to respond when a domain name matches _host_, default to ````127.0.0.1````
+* _target_ is the IP address to respond when a domain name matches _host_, default to ````127.0.0.1````
 * if target is not an IP then target is first resolved to an IP address (before olodum is started) 
 
 sudo is needed to bind to local port 53 (DNS server)
