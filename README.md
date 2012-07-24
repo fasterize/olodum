@@ -53,11 +53,11 @@ Just use Olodum !
 
 Want to serve a new www.google.com site ? Just start your local webserver and use :
 
-````sudo olodum www.google.com 127.0.0.1````
+````sudo olodum www.google.com -t 127.0.0.1````
  
 Want to map www.gooooogle.com on www.google.com to see if goog uses vhosts ? Just use :
 
-````sudo olodum www.gooooogle.com www.google.com````
+````sudo olodum www.gooooogle.com -t www.google.com````
 
 ##wildcard domain names
 If you've got wildcard domain names to point to one IP, you need to enter each line in your /etc/host
@@ -76,7 +76,7 @@ In this example, every DNS request containing google will be answered with 127.0
 ## CNAME
 When you're setting up a proxy, a cache, a CDN or even better, a frontend optimizer for your live servers and you want to test if their configuration is ok, instead of using one of the provider IP, use the future used CNAME as the target for olodum :
 
-````sudo olodum www.fasterize.com www.fasterize.com.fasterized.org```` 
+````sudo olodum www.fasterize.com -t www.fasterize.com.fasterized.org````
 
 and you're ready to go and test your _fasterized_ website !
 
@@ -103,7 +103,7 @@ Tests
 ===
     sudo npm test
 
-Tests are not complete, must work on it.
+Tests are not complete, must work on it (i think https://github.com/cloudhead/vows/pull/222 should help).
 
 Caveats
 =======
@@ -130,6 +130,10 @@ TODO
  * AdBlocker & blakchole management based on blacklists
  * regex on host
  * tests
+
+Thanks
+======
+This module is based on this dns library for nodejs : https://github.com/jsjohnst/ndns (no more maintained). This fork is more up-to-date : https://github.com/atrniv/ndns.
 
 Licence
 ====
