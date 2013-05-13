@@ -103,11 +103,11 @@ Tests
 ===
     sudo npm test
 
-Tests are not complete, must work on it (i think https://github.com/cloudhead/vows/pull/222 should help).
+Tests are not complete, must work on it and use Mocha.
 
 Caveats
 =======
-Sometimes resolving hosts through olodum will fail and your request will hang. Need to fix this.
+Not compliant with AAAA (IPV6) records. 
 
 Inner working
 =============
@@ -133,7 +133,7 @@ TODO
 
 Thanks
 ======
-This module is based on this dns library for nodejs : https://github.com/jsjohnst/ndns (no more maintained). This fork is more up-to-date : https://github.com/atrniv/ndns.
+This module is based on these dns library for nodejs : https://github.com/iriscouch/dnsd and https://github.com/jsjohnst/ndns (no more maintained, this fork is more up-to-date : https://github.com/atrniv/ndns).
 
 Licence
 ====
