@@ -12,7 +12,7 @@
     "ndns": "git://github.com/stefounet/ndns.git",
     "optimist": "",
     "growl": "",
-    "dnsd":""
+    "dnsd":"^0.9.5"
   },
   "devDependencies": {
     "vows": "0.5.11"
